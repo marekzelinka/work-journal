@@ -9,40 +9,39 @@ export const meta: MetaFunction = () => {
 
 export default function Component() {
   return (
-    <div className="p-4 font-sans">
-      <h1 className="text-3xl">Welcome to Remix</h1>
-      <ul className="mt-4 list-disc space-y-2 pl-6">
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/start/quickstart"
-            rel="noreferrer"
-          >
-            5m Quick Start
-          </a>
-        </li>
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/start/tutorial"
-            rel="noreferrer"
-          >
-            30m Tutorial
-          </a>
-        </li>
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/docs"
-            rel="noreferrer"
-          >
-            Remix Docs
-          </a>
-        </li>
-      </ul>
+    <div className="p-10">
+      <h1 className="text-5xl">Work Journal</h1>
+      <p className="mt-2 text-lg text-gray-400">
+        Learnings and doings. Updated weekly.
+      </p>
+      <div className="mt-6">
+        <p className="font-bold">
+          Week of February 20<sup>th</sup>
+        </p>
+        <div className="mt-3 space-y-4">
+          <div>
+            <p>Work</p>
+            <ul className="ml-8 list-disc">
+              <li>First item</li>
+              <li>Second item</li>
+            </ul>
+          </div>
+          <div>
+            <p>Learnings</p>
+            <ul className="ml-8 list-disc">
+              <li>First item</li>
+              <li>Second item</li>
+            </ul>
+          </div>
+          <div>
+            <p>Interesting things</p>
+            <ul className="ml-8 list-disc">
+              <li>First item</li>
+              <li>Second item</li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
