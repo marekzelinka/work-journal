@@ -1,3 +1,4 @@
+import { PrismaClient } from "@prisma/client";
 import {
   redirect,
   type ActionFunctionArgs,
@@ -13,9 +14,20 @@ export const meta: MetaFunction = () => {
 };
 
 export async function action({ request }: ActionFunctionArgs) {
+  const db = new PrismaClient();
+
   const fromData = await request.formData();
-  const data = Object.fromEntries(fromData);
-  console.log(data);
+  const { date, type, text } = Object.fromEntries(fromData);
+
+  if (
+    typeof date !== "string" ||
+    typeof type !== "string" ||
+    typeof text !== "string"
+  ) {
+    throw new Error("Bad request");
+  }
+
+  await db.entry.create({ data: { date: new Date(date), type, text } });
 
   return redirect("/");
 }
