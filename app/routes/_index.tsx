@@ -1,11 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import {
-  redirect,
-  type ActionFunctionArgs,
-  type MetaFunction,
-} from "@remix-run/node";
-import { useFetcher } from "@remix-run/react";
-import { format } from "date-fns";
+import { type ActionFunctionArgs, type MetaFunction } from "@remix-run/node";
+import { useFetcher, useLoaderData } from "@remix-run/react";
+import { format, parseISO, startOfWeek } from "date-fns";
 import { useEffect, useRef } from "react";
 
 export const meta: MetaFunction = () => {
@@ -14,6 +10,17 @@ export const meta: MetaFunction = () => {
     { name: "description", content: "Welcome to Remix!" },
   ];
 };
+
+export async function loader() {
+  const db = new PrismaClient();
+
+  const entries = await db.entry.findMany();
+
+  return entries.map((entry) => ({
+    ...entry,
+    date: entry.date.toISOString().substring(0, 10),
+  }));
+}
 
 export async function action({ request }: ActionFunctionArgs) {
   const db = new PrismaClient();
@@ -29,12 +36,39 @@ export async function action({ request }: ActionFunctionArgs) {
     throw new Error("Bad request");
   }
 
-  await db.entry.create({ data: { date: new Date(date), type, text } });
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  return redirect("/");
+  return await db.entry.create({ data: { date: new Date(date), type, text } });
 }
 
 export default function Component() {
+  const entries = useLoaderData<typeof loader>();
+
+  const entriesByWeek = entries.reduce<Record<string, typeof entries>>(
+    (memo, entry) => {
+      const sunday = startOfWeek(parseISO(entry.date));
+      const sundayString = format(sunday, "yyyy-MM-dd");
+
+      memo[sundayString] ||= [];
+      memo[sundayString].push(entry);
+
+      return memo;
+    },
+    {},
+  );
+  const weeks = Object.keys(entriesByWeek)
+    .sort((a, b) => b.localeCompare(a))
+    .map((dateString) => ({
+      dateString,
+      work: entriesByWeek[dateString].filter((entry) => entry.type === "work"),
+      learnings: entriesByWeek[dateString].filter(
+        (entry) => entry.type === "learning",
+      ),
+      interestingThings: entriesByWeek[dateString].filter(
+        (entry) => entry.type === "interesting-thing",
+      ),
+    }));
+
   const fetcher = useFetcher();
   const isSubmitting = fetcher.state === "submitting";
 
@@ -124,33 +158,46 @@ export default function Component() {
           </fieldset>
         </fetcher.Form>
       </div>
-      <div className="mt-8">
-        <p className="font-bold">
-          Week of February 20<sup>th</sup>
-        </p>
-        <div className="mt-3 space-y-4">
-          <div>
-            <p>Work</p>
-            <ul className="ml-8 list-disc">
-              <li>First item</li>
-              <li>Second item</li>
-            </ul>
+      <div className="mt-12 space-y-12">
+        {weeks.map((week) => (
+          <div key={week.dateString}>
+            <p className="font-bold">
+              Week of {format(parseISO(week.dateString), "MMMM do")}
+            </p>
+            <div className="mt-3 space-y-4">
+              {week.work.length ? (
+                <div>
+                  <p>Work</p>
+                  <ul className="ml-8 list-disc">
+                    {week.work.map((entry) => (
+                      <li key={entry.id}>{entry.text}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {week.learnings.length ? (
+                <div>
+                  <p>Learning</p>
+                  <ul className="ml-8 list-disc">
+                    {week.learnings.map((entry) => (
+                      <li key={entry.id}>{entry.text}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {week.interestingThings.length ? (
+                <div>
+                  <p>Interesting things</p>
+                  <ul className="ml-8 list-disc">
+                    {week.interestingThings.map((entry) => (
+                      <li key={entry.id}>{entry.text}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
           </div>
-          <div>
-            <p>Learnings</p>
-            <ul className="ml-8 list-disc">
-              <li>First item</li>
-              <li>Second item</li>
-            </ul>
-          </div>
-          <div>
-            <p>Interesting things</p>
-            <ul className="ml-8 list-disc">
-              <li>First item</li>
-              <li>Second item</li>
-            </ul>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
