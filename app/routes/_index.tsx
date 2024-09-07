@@ -4,9 +4,9 @@ import {
   type MetaFunction,
   type SerializeFrom,
 } from "@remix-run/node";
-import { Link, useFetcher, useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import { format, parseISO, startOfWeek } from "date-fns";
-import { useEffect, useRef } from "react";
+import { EntryForm } from "~/components/entry-form";
 
 export const meta: MetaFunction = () => {
   return [
@@ -73,90 +73,13 @@ export default function Component() {
       ),
     }));
 
-  const fetcher = useFetcher();
-  const isSubmitting = fetcher.state === "submitting";
-
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    if (fetcher.state === "idle" && textareaRef.current) {
-      textareaRef.current.value = "";
-      textareaRef.current.focus();
-    }
-  }, [fetcher.state]);
-
   return (
     <>
       <div className="border p-3">
         <p className="italic">Create a new entry</p>
-        <fetcher.Form method="POST" className="mt-2">
-          <fieldset disabled={isSubmitting} className="disabled:opacity-70">
-            <div>
-              <div>
-                <input
-                  type="date"
-                  name="date"
-                  id="date"
-                  required
-                  defaultValue={format(new Date(), "yyyy-MM-dd")}
-                  className="text-gray-900"
-                />
-              </div>
-              <div className="mt-4 flex gap-4">
-                <label htmlFor="work" className="flex items-center gap-1">
-                  <input
-                    type="radio"
-                    name="type"
-                    id="work"
-                    required
-                    defaultChecked
-                    value="work"
-                  />
-                  Work
-                </label>
-                <label htmlFor="learning" className="flex items-center gap-1">
-                  <input
-                    type="radio"
-                    name="type"
-                    id="learning"
-                    value="learning"
-                  />
-                  Learning
-                </label>
-                <label
-                  htmlFor="interesting-thing"
-                  className="flex items-center gap-1"
-                >
-                  <input
-                    type="radio"
-                    name="type"
-                    id="interesting-thing"
-                    value="interesting-thing"
-                  />
-                  Interesting thing
-                </label>
-              </div>
-            </div>
-            <div className="mt-4">
-              <textarea
-                ref={textareaRef}
-                name="text"
-                id="text"
-                className="w-full text-gray-700"
-                placeholder="Type your entry..."
-                aria-label="Entry"
-              />
-            </div>
-            <div className="mt-2 text-right">
-              <button
-                type="submit"
-                className="bg-blue-500 px-4 py-1 font-semibold text-white"
-              >
-                {isSubmitting ? "Saving…" : "Save"}
-              </button>
-            </div>
-          </fieldset>
-        </fetcher.Form>
+        <div className="mt-2">
+          <EntryForm />
+        </div>
       </div>
       <div className="mt-12 space-y-12">
         {weeks.map((week) => (

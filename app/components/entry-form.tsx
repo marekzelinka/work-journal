@@ -1,19 +1,29 @@
 import { useFetcher } from "@remix-run/react";
-import { useRef } from "react";
+import { format } from "date-fns";
+import { useEffect, useRef } from "react";
 
 export function EntryForm({
   entry,
 }: {
-  entry: { text: string; date: string; type: string };
+  entry?: { text: string; date: string; type: string };
 }) {
   const fetcher = useFetcher();
-  const isSubmitting = fetcher.state === "submitting";
+
+  const isSaving = fetcher.state === "submitting";
+  const isSaved = fetcher.state === "idle" && fetcher.data != null;
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  useEffect(() => {
+    if (isSaved && textareaRef.current) {
+      textareaRef.current.value = "";
+      textareaRef.current.focus();
+    }
+  }, [isSaved]);
+
   return (
     <fetcher.Form method="POST">
-      <fieldset disabled={isSubmitting} className="disabled:opacity-70">
+      <fieldset disabled={isSaving} className="disabled:opacity-70">
         <div>
           <div>
             <input
@@ -21,45 +31,32 @@ export function EntryForm({
               name="date"
               id="date"
               required
-              defaultValue={entry.date}
+              defaultValue={entry?.date ?? format(new Date(), "yyyy-MM-dd")}
               className="text-gray-900"
             />
           </div>
           <div className="mt-4 flex gap-4">
-            <label htmlFor="work" className="flex items-center gap-1">
-              <input
-                type="radio"
-                name="type"
-                id="work"
-                required
-                defaultChecked={entry.type === "work"}
-                value="work"
-              />
-              Work
-            </label>
-            <label htmlFor="learning" className="flex items-center gap-1">
-              <input
-                type="radio"
-                name="type"
-                id="learning"
-                value="learning"
-                defaultChecked={entry.type === "learning"}
-              />
-              Learning
-            </label>
-            <label
-              htmlFor="interesting-thing"
-              className="flex items-center gap-1"
-            >
-              <input
-                type="radio"
-                name="type"
-                id="interesting-thing"
-                value="interesting-thing"
-                defaultChecked={entry.type === "interesting-thing"}
-              />
-              Interesting thing
-            </label>
+            {[
+              { label: "Work", value: "work" },
+              { label: "Learning", value: "learning" },
+              { label: "Interesting thing", value: "interesting-thing" },
+            ].map((option) => (
+              <label
+                key={option.value}
+                htmlFor={option.value}
+                className="flex items-center gap-1"
+              >
+                <input
+                  type="radio"
+                  name="type"
+                  id={option.value}
+                  required
+                  defaultChecked={option.value === (entry?.type ?? "work")}
+                  value={option.value}
+                />
+                {option.label}
+              </label>
+            ))}
           </div>
         </div>
         <div className="mt-4">
@@ -67,7 +64,7 @@ export function EntryForm({
             ref={textareaRef}
             name="text"
             id="text"
-            defaultValue={entry.text}
+            defaultValue={entry?.text}
             className="w-full text-gray-700"
             placeholder="Type your entry..."
             aria-label="Entry"
@@ -78,7 +75,7 @@ export function EntryForm({
             type="submit"
             className="bg-blue-500 px-4 py-1 font-semibold text-white"
           >
-            {isSubmitting ? "Saving…" : "Save"}
+            {isSaving ? "Saving…" : "Save"}
           </button>
         </div>
       </fieldset>
