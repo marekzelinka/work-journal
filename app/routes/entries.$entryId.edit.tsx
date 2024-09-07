@@ -4,7 +4,7 @@ import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
 } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 import { EntryForm } from "~/components/entry-form";
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -24,29 +24,33 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
-  const db = new PrismaClient();
-
-  if (typeof params.entryId !== "string") {
-    throw new Response("Not Found", { status: 404 });
-  }
-
-  const fromData = await request.formData();
-  const { date, type, text } = Object.fromEntries(fromData);
-
-  if (
-    typeof date !== "string" ||
-    typeof type !== "string" ||
-    typeof text !== "string"
-  ) {
-    throw new Error("Bad request");
-  }
-
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  await db.entry.update({
-    where: { id: params.entryId },
-    data: { date: new Date(date), type, text },
-  });
+  const db = new PrismaClient();
+
+  const fromData = await request.formData();
+  const { _action, date, type, text } = Object.fromEntries(fromData);
+
+  if (_action === "delete") {
+    await db.entry.delete({ where: { id: params.entryId } });
+  } else {
+    if (
+      typeof date !== "string" ||
+      typeof type !== "string" ||
+      typeof text !== "string"
+    ) {
+      throw new Error("Bad request");
+    }
+
+    if (typeof params.entryId !== "string") {
+      throw new Response("Not Found", { status: 404 });
+    }
+
+    await db.entry.update({
+      where: { id: params.entryId },
+      data: { date: new Date(date), type, text },
+    });
+  }
 
   return redirect("/");
 }
@@ -59,6 +63,27 @@ export default function Component() {
       <p>Editing entry {entry.id}</p>
       <div className="mt-8">
         <EntryForm entry={entry} />
+      </div>
+      <div className="mt-8">
+        <Form
+          method="POST"
+          onSubmit={(event) => {
+            const shouldDelete = window.confirm("Are you sure?");
+
+            if (!shouldDelete) {
+              event.preventDefault();
+            }
+          }}
+        >
+          <button
+            type="submit"
+            name="_action"
+            value="delete"
+            className="text-gray-500 underline"
+          >
+            Delete this entry…
+          </button>
+        </Form>
       </div>
     </div>
   );
