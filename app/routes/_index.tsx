@@ -4,7 +4,9 @@ import {
   type ActionFunctionArgs,
   type MetaFunction,
 } from "@remix-run/node";
-import { Form } from "@remix-run/react";
+import { useFetcher } from "@remix-run/react";
+import { format } from "date-fns";
+import { useEffect, useRef } from "react";
 
 export const meta: MetaFunction = () => {
   return [
@@ -33,6 +35,18 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Component() {
+  const fetcher = useFetcher();
+  const isSubmitting = fetcher.state === "submitting";
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (fetcher.state === "idle" && textareaRef.current) {
+      textareaRef.current.value = "";
+      textareaRef.current.focus();
+    }
+  }, [fetcher.state]);
+
   return (
     <div className="p-10">
       <h1 className="text-5xl">Work Journal</h1>
@@ -41,62 +55,74 @@ export default function Component() {
       </p>
       <div className="mt-8 border p-3">
         <p className="italic">Create a new entry</p>
-        <Form method="POST" className="mt-2">
-          <div>
+        <fetcher.Form method="POST" className="mt-2">
+          <fieldset disabled={isSubmitting} className="disabled:opacity-70">
             <div>
-              <input
-                type="date"
-                name="date"
-                id="date"
-                className="text-gray-500"
+              <div>
+                <input
+                  type="date"
+                  name="date"
+                  id="date"
+                  required
+                  defaultValue={format(new Date(), "yyyy-MM-dd")}
+                  className="text-gray-900"
+                />
+              </div>
+              <div className="mt-4 flex gap-4">
+                <label htmlFor="work" className="flex items-center gap-1">
+                  <input
+                    type="radio"
+                    name="type"
+                    id="work"
+                    required
+                    defaultChecked
+                    value="work"
+                  />
+                  Work
+                </label>
+                <label htmlFor="learning" className="flex items-center gap-1">
+                  <input
+                    type="radio"
+                    name="type"
+                    id="learning"
+                    value="learning"
+                  />
+                  Learning
+                </label>
+                <label
+                  htmlFor="interesting-thing"
+                  className="flex items-center gap-1"
+                >
+                  <input
+                    type="radio"
+                    name="type"
+                    id="interesting-thing"
+                    value="interesting-thing"
+                  />
+                  Interesting thing
+                </label>
+              </div>
+            </div>
+            <div className="mt-4">
+              <textarea
+                ref={textareaRef}
+                name="text"
+                id="text"
+                className="w-full text-gray-700"
+                placeholder="Type your entry..."
+                aria-label="Entry"
               />
             </div>
-            <div className="mt-4 flex gap-4">
-              <label htmlFor="work" className="flex items-center gap-1">
-                <input type="radio" name="type" id="work" value="work" />
-                Work
-              </label>
-              <label htmlFor="learning" className="flex items-center gap-1">
-                <input
-                  type="radio"
-                  name="type"
-                  id="learning"
-                  value="learning"
-                />
-                Learning
-              </label>
-              <label
-                htmlFor="interesting-thing"
-                className="flex items-center gap-1"
+            <div className="mt-2 text-right">
+              <button
+                type="submit"
+                className="bg-blue-500 px-4 py-1 font-semibold text-white"
               >
-                <input
-                  type="radio"
-                  name="type"
-                  id="interesting-thing"
-                  value="interesting-thing"
-                />
-                Interesting thing
-              </label>
+                {isSubmitting ? "Saving…" : "Save"}
+              </button>
             </div>
-          </div>
-          <div className="mt-4">
-            <textarea
-              name="text"
-              id="text"
-              className="w-full text-gray-700"
-              placeholder="Type your entry..."
-              aria-label="Entry"
-            />
-          </div>
-          <div className="mt-2 text-right">
-            <button
-              type="submit"
-              className="bg-blue-500 px-4 py-1 font-semibold text-white"
-            >
-              Save
-            </button>
-          </div>
-        </Form>
+          </fieldset>
+        </fetcher.Form>
       </div>
       <div className="mt-8">
         <p className="font-bold">
