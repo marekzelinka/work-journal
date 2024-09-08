@@ -2,6 +2,7 @@ import {
   redirect,
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
+  type MetaFunction,
 } from "@remix-run/node";
 import {
   Form,
@@ -18,6 +19,10 @@ import {
 import type { ReactNode } from "react";
 import { destroySession, getSession } from "./session";
 import "./tailwind.css";
+
+export const meta: MetaFunction<typeof loader> = ({ error }) => {
+  return [{ title: error ? "Oh no!" : "New Remix App" }];
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get("cookie"));
