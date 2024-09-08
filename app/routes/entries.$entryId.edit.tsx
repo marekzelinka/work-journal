@@ -9,12 +9,12 @@ import { EntryForm } from "~/components/entry-form";
 import { getSession } from "~/session";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
-  const db = new PrismaClient();
-
   const session = await getSession(request.headers.get("cookie"));
   if (!session.data.isAdmin) {
     throw new Response("Not authenticated", { status: 401 });
   }
+
+  const db = new PrismaClient();
 
   if (typeof params.entryId !== "string") {
     throw new Response("Not Found", { status: 404 });
@@ -31,6 +31,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 export async function action({ request, params }: ActionFunctionArgs) {
   await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const session = await getSession(request.headers.get("cookie"));
+  if (!session.data.isAdmin) {
+    throw new Response("Not authenticated", { status: 401 });
+  }
 
   const db = new PrismaClient();
 

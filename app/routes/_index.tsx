@@ -26,6 +26,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const session = await getSession(request.headers.get("cookie"));
+  if (!session.data.isAdmin) {
+    throw new Response("Not authenticated", { status: 401 });
+  }
+
   const db = new PrismaClient();
 
   const fromData = await request.formData();
@@ -38,8 +45,6 @@ export async function action({ request }: ActionFunctionArgs) {
   ) {
     throw new Error("Bad request");
   }
-
-  await new Promise((resolve) => setTimeout(resolve, 1000));
 
   return await db.entry.create({ data: { date: new Date(date), type, text } });
 }
