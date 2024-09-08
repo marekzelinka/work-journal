@@ -1,6 +1,6 @@
 import { createCookieSessionStorage } from "@remix-run/node";
 
-const SESSION_SECRET = process.env.SECCION_SECRET;
+const SESSION_SECRET = process.env.SESSION_SECRET;
 
 if (!SESSION_SECRET) {
   throw new Error("ENV varaible SESSION_SECRET must be defined");
