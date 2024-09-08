@@ -6,9 +6,15 @@ import {
 } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
 import { EntryForm } from "~/components/entry-form";
+import { getSession } from "~/session";
 
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
   const db = new PrismaClient();
+
+  const session = await getSession(request.headers.get("cookie"));
+  if (!session.data.isAdmin) {
+    throw new Response("Not authenticated", { status: 401 });
+  }
 
   if (typeof params.entryId !== "string") {
     throw new Response("Not Found", { status: 404 });

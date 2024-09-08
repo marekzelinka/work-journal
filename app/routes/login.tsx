@@ -44,6 +44,7 @@ export default function Component() {
             name="email"
             id="email"
             className="text-gray-900"
+            placeholder="Email"
             aria-label="Email"
           />
           <input
@@ -51,6 +52,7 @@ export default function Component() {
             name="password"
             id="password"
             className="text-gray-900"
+            placeholder="Password"
             aria-label="Password"
           />
           <button
