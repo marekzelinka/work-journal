@@ -1,10 +1,11 @@
 import { invariant, invariantResponse } from "@epic-web/invariant";
+import { ArrowLeftIcon } from "@heroicons/react/16/solid";
 import {
   redirect,
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
 } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, Link, useLoaderData } from "@remix-run/react";
 import { EntryForm } from "~/components/entry-form";
 import { db } from "~/lib/db.server";
 import { requiredSignedAdmin } from "~/lib/session.server";
@@ -53,7 +54,16 @@ export default function Component() {
 
   return (
     <>
-      <div className="rounded-lg border border-gray-700/30 bg-gray-800/50 p-4 lg:p-6">
+      <div className="relative -mt-7">
+        <Link
+          to=".."
+          className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-200"
+        >
+          <ArrowLeftIcon className="size-4 text-gray-400" />
+          Go back
+        </Link>
+      </div>
+      <div className="mt-2 rounded-lg border border-gray-700/30 bg-gray-800/50 p-4 lg:p-6">
         <p className="text-sm font-medium text-gray-500 lg:text-base">
           Create a new entry
         </p>
@@ -76,7 +86,7 @@ export default function Component() {
             type="submit"
             name="_action"
             value="delete"
-            className="text-sm text-red-600 underline hover:text-red-500"
+            className="text-sm text-red-400 underline hover:text-red-200"
           >
             Delete this entry…
           </button>
