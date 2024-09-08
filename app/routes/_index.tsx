@@ -1,4 +1,4 @@
-import { CloudIcon } from "@heroicons/react/20/solid";
+import { CloudIcon } from "@heroicons/react/16/solid";
 import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,

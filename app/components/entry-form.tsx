@@ -1,3 +1,11 @@
+import {
+  Button,
+  Field,
+  Fieldset,
+  Input,
+  Label,
+  Textarea,
+} from "@headlessui/react";
 import { Form, useSubmit } from "@remix-run/react";
 import { format } from "date-fns";
 import { useRef } from "react";
@@ -35,16 +43,16 @@ export function EntryForm({
         }
       }}
     >
-      <fieldset className="space-y-6">
+      <Fieldset className="space-y-6" aria-label="New entry">
         <div className="max-lg:space-y-6 lg:flex lg:items-center lg:justify-between">
           <div className="lg:order-last">
-            <input
+            <Input
               type="date"
               name="date"
               id="date"
               required
               defaultValue={entry?.date ?? format(new Date(), "yyyy-MM-dd")}
-              className="block w-full rounded-md border border-gray-700 bg-gray-800 text-white focus:border-sky-600 focus:ring-sky-600"
+              className="block w-full rounded-md border border-gray-700 bg-gray-800 text-white data-[focus]:border-sky-600 data-[focus]:ring-sky-600"
             />
           </div>
           <div className="flex gap-4 lg:gap-6">
@@ -53,27 +61,24 @@ export function EntryForm({
               { label: "Learning", value: "learning" },
               { label: "Interesting thing", value: "interesting-thing" },
             ].map((option) => (
-              <label
-                key={option.value}
-                htmlFor={option.value}
-                className="flex items-center gap-2 text-sm text-white lg:text-base"
-              >
-                <input
+              <Field key={option.value} className="flex items-center gap-2">
+                <Input
                   type="radio"
                   name="type"
-                  id={option.value}
                   required
                   defaultChecked={option.value === (entry?.type ?? "work")}
                   value={option.value}
-                  className="border-gray-700 bg-gray-800 text-sky-600 focus:border-sky-600 focus:ring-sky-600 focus:ring-offset-gray-900"
+                  className="border-gray-700 bg-gray-800 text-sky-600 data-[focus]:border-sky-600 data-[focus]:ring-sky-600 data-[focus]:ring-offset-gray-900"
                 />
-                {option.label}
-              </label>
+                <Label className="text-sm text-white lg:text-base">
+                  {option.label}
+                </Label>
+              </Field>
             ))}
           </div>
         </div>
         <div>
-          <textarea
+          <Textarea
             ref={textareaRef}
             name="text"
             id="text"
@@ -94,20 +99,20 @@ export function EntryForm({
                 );
               }
             }}
-            className="block w-full rounded-md border-gray-700 bg-gray-800 text-white focus:border-sky-600 focus:ring-sky-600"
+            className="block w-full rounded-md border-gray-700 bg-gray-800 text-white data-[focus]:border-sky-600 data-[focus]:ring-sky-600"
             placeholder="Type your entry..."
             aria-label="Entry"
           />
         </div>
         <div className="lg:flex lg:justify-end">
-          <button
+          <Button
             type="submit"
-            className="w-full rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-600 focus:ring-offset-2 focus:ring-offset-gray-900 lg:w-auto lg:py-1.5"
+            className="w-full rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white focus:outline-none data-[hover]:bg-sky-500 data-[focus]:ring-2 data-[focus]:ring-sky-600 data-[focus]:ring-offset-2 data-[focus]:ring-offset-gray-900 lg:w-auto lg:py-1.5"
           >
             Save
-          </button>
+          </Button>
         </div>
-      </fieldset>
+      </Fieldset>
     </Form>
   );
 }

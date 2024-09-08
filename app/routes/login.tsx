@@ -1,4 +1,5 @@
 import { invariant } from "@epic-web/invariant";
+import { Button, Input } from "@headlessui/react";
 import {
   json,
   redirect,
@@ -40,22 +41,22 @@ export default function Component() {
     <div className="mx-auto max-w-xs lg:max-w-sm">
       <Form method="POST">
         <div className="space-y-2">
-          <input
+          <Input
             type="password"
             name="password"
             id="password"
-            className="w-full rounded-md border-gray-700 bg-gray-800 text-white focus:border-sky-600 focus:ring-sky-600"
+            className="w-full rounded-md border-gray-700 bg-gray-800 text-white data-[focus]:border-sky-600 data-[focus]:ring-sky-600"
             placeholder="Password"
             aria-label="Password"
           />
         </div>
         <div className="mt-8">
-          <button
+          <Button
             type="submit"
-            className="w-full rounded-md bg-sky-600 px-3 py-2 font-medium text-white focus:outline-none focus:ring-2 focus:ring-sky-600 focus:ring-offset-2 focus:ring-offset-gray-900"
+            className="w-full rounded-md bg-sky-600 px-3 py-2 font-medium text-white focus:outline-none data-[hover]:bg-sky-500 data-[focus]:ring-2 data-[focus]:ring-sky-600 data-[focus]:ring-offset-2 data-[focus]:ring-offset-gray-900"
           >
             Login
-          </button>
+          </Button>
         </div>
         {actionData?.error ? (
           <p className="mt-4 font-medium text-red-500">{actionData.error}</p>
