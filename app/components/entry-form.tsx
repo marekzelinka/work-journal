@@ -23,7 +23,10 @@ export function EntryForm({
 
   return (
     <fetcher.Form method="POST">
-      <fieldset disabled={isSaving} className="space-y-6 disabled:opacity-70">
+      <fieldset
+        disabled={isSaving}
+        className="space-y-6 disabled:pointer-events-none disabled:opacity-70"
+      >
         <div className="max-lg:space-y-6 lg:flex lg:items-center lg:justify-between">
           <div className="lg:order-last">
             <input
