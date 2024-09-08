@@ -2,20 +2,12 @@ import { PrismaClient } from "@prisma/client";
 import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
-  type MetaFunction,
   type SerializeFrom,
 } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { format, parseISO, startOfWeek } from "date-fns";
 import { EntryForm } from "~/components/entry-form";
 import { getSession } from "~/session";
-
-export const meta: MetaFunction = () => {
-  return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
-  ];
-};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get("cookie"));

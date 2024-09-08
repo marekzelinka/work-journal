@@ -57,7 +57,7 @@ export default function Component() {
             type="submit"
             className="inline-flex bg-blue-500 px-3 py-2 font-medium text-white"
           >
-            Log in
+            Login
           </button>
         </Form>
       )}
