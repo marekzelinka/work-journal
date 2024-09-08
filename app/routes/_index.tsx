@@ -1,5 +1,4 @@
 import { CloudIcon } from "@heroicons/react/20/solid";
-import { PrismaClient } from "@prisma/client";
 import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
@@ -7,18 +6,13 @@ import {
 import { Link, useFetchers, useLoaderData } from "@remix-run/react";
 import { compareDesc, format, parseISO, startOfWeek } from "date-fns";
 import { EntryForm } from "~/components/entry-form";
-import { getSession } from "~/session";
-
-const DELAY = 500;
+import { db } from "~/lib/db.server";
+import { getSignedAdmin, requiredSignedAdmin } from "~/lib/session.server";
 
 type Entry = Awaited<ReturnType<typeof loader>>["entries"][number];
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  await new Promise((resolve) => setTimeout(resolve, DELAY));
-
-  const session = await getSession(request.headers.get("cookie"));
-
-  const db = new PrismaClient();
+  const isAdmin = await getSignedAdmin(request);
 
   const entries = await db.entry.findMany({
     select: { id: true, date: true, type: true, text: true },
@@ -26,7 +20,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   });
 
   return {
-    session: session.data,
+    isAdmin,
     entries: entries.map((entry) => ({
       ...entry,
       date: entry.date.toISOString().substring(0, 10),
@@ -35,18 +29,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  await new Promise((resolve) => setTimeout(resolve, DELAY));
-
-  const session = await getSession(request.headers.get("cookie"));
-
-  if (!session.data.isAdmin) {
-    throw new Response("Not authenticated", {
-      status: 401,
-      statusText: "Not authenticated",
-    });
-  }
-
-  const db = new PrismaClient();
+  await requiredSignedAdmin(request);
 
   const fromData = await request.formData();
   const { id, date, type, text } = validate(Object.fromEntries(fromData));
@@ -57,7 +40,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Component() {
-  const { session, entries } = useLoaderData<typeof loader>();
+  const { isAdmin, entries } = useLoaderData<typeof loader>();
 
   const entriesById = new Map(entries.map((entry) => [entry.id, entry]));
 
@@ -98,7 +81,7 @@ export default function Component() {
 
   return (
     <>
-      {session.isAdmin ? (
+      {isAdmin ? (
         <div className="rounded-lg border border-gray-700/30 bg-gray-800/50 p-4 lg:p-6">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-gray-500 lg:text-base">
@@ -165,12 +148,12 @@ function useOptimisticEntries() {
 }
 
 function EntryListItem({ entry }: { entry: Entry }) {
-  const { session } = useLoaderData<typeof loader>();
+  const { isAdmin } = useLoaderData<typeof loader>();
 
   return (
     <li className="group leading-7">
       {entry.text}
-      {session.isAdmin ? (
+      {isAdmin ? (
         <Link
           to={`/entries/${entry.id}/edit`}
           className="ml-2 text-sky-500 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"

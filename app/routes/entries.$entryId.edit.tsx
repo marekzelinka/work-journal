@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { invariant, invariantResponse } from "@epic-web/invariant";
 import {
   redirect,
   type ActionFunctionArgs,
@@ -6,29 +6,15 @@ import {
 } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
 import { EntryForm } from "~/components/entry-form";
-import { getSession } from "~/session";
+import { db } from "~/lib/db.server";
+import { requiredSignedAdmin } from "~/lib/session.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
-  const session = await getSession(request.headers.get("cookie"));
+  await requiredSignedAdmin(request);
 
-  if (!session.data.isAdmin) {
-    throw new Response("Not authenticated", {
-      status: 401,
-      statusText: "Not authenticated",
-    });
-  }
-
-  const db = new PrismaClient();
-
-  if (typeof params.entryId !== "string") {
-    throw new Response("Not Found", { status: 404, statusText: "Not Found" });
-  }
-
+  invariant(params.entryId, "entryId is missing");
   const entry = await db.entry.findUnique({ where: { id: params.entryId } });
-
-  if (!entry) {
-    throw new Response("Not Found", { status: 404, statusText: "Not Found" });
-  }
+  invariantResponse(entry, "Not Found");
 
   return { ...entry, date: entry.date.toISOString().substring(0, 10) };
 }
@@ -36,15 +22,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 export async function action({ request, params }: ActionFunctionArgs) {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  const session = await getSession(request.headers.get("cookie"));
-  if (!session.data.isAdmin) {
-    throw new Response("Not authenticated", {
-      status: 401,
-      statusText: "Not authenticated",
-    });
-  }
-
-  const db = new PrismaClient();
+  await requiredSignedAdmin(request);
 
   const fromData = await request.formData();
   const { _action, date, type, text } = Object.fromEntries(fromData);
@@ -60,10 +38,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       throw new Error("Bad request");
     }
 
-    if (typeof params.entryId !== "string") {
-      throw new Response("Not Found", { status: 404, statusText: "Not Found" });
-    }
-
+    invariant(params.entryId, "entryId is missing");
     await db.entry.update({
       where: { id: params.entryId },
       data: { date: new Date(date), type, text },

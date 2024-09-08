@@ -1,5 +1,4 @@
 import {
-  redirect,
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
   type MetaFunction,
@@ -17,7 +16,7 @@ import {
   useRouteError,
 } from "@remix-run/react";
 import type { ReactNode } from "react";
-import { destroySession, getSession } from "./session";
+import { getSignedAdmin, logout } from "./lib/session.server";
 import "./tailwind.css";
 
 export const meta: MetaFunction<typeof loader> = ({ error }) => {
@@ -25,19 +24,13 @@ export const meta: MetaFunction<typeof loader> = ({ error }) => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const session = await getSession(request.headers.get("cookie"));
+  const isAdmin = await getSignedAdmin(request);
 
-  return { session: session.data };
+  return { isAdmin };
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const session = await getSession(request.headers.get("cookie"));
-
-  return redirect("/", {
-    headers: {
-      "Set-Cookie": await destroySession(session),
-    },
-  });
+  return await logout(request);
 }
 
 export function ErrorBoundary() {
@@ -78,25 +71,27 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 export default function Component() {
-  const { session } = useLoaderData<typeof loader>();
+  const { isAdmin } = useLoaderData<typeof loader>();
 
   return (
-    <>
+    <div className="flex h-full flex-col">
       <nav className="px-4 lg:px-6">
         <div className="mx-auto max-w-xl pt-4 lg:max-w-7xl lg:border-b lg:border-gray-800 lg:pb-5 lg:pt-5">
           <div className="flex items-center justify-between">
             <Link
               to="https://www.linkedin.com/in/marekzelinka/"
+              target="_blank"
+              rel="noreferrer"
               className="text-sm uppercase lg:text-lg"
             >
               <span className="text-gray-500">Marek</span>
               <span className="font-semibold text-gray-200">Zelinka</span>
             </Link>
-            {session.isAdmin ? (
+            {isAdmin ? (
               <Form method="POST">
                 <button
                   type="submit"
-                  className="text-sm font-medium text-gray-500 hover:text-gray-200"
+                  className="text-sm font-medium text-gray-400 hover:text-gray-200"
                 >
                   Sign out
                 </button>
@@ -104,7 +99,7 @@ export default function Component() {
             ) : (
               <Link
                 to="/login"
-                className="text-sm font-medium text-gray-500 hover:text-gray-200"
+                className="text-sm font-medium text-gray-400 hover:text-gray-200"
               >
                 Login
               </Link>
@@ -124,9 +119,26 @@ export default function Component() {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-3xl px-4 pb-8 lg:px-6">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-12 lg:px-6">
         <Outlet />
       </main>
-    </>
+      <footer className="px-4 lg:px-6">
+        <div className="mx-auto max-w-xl pb-4 lg:max-w-7xl lg:border-t lg:border-gray-800 lg:pb-5 lg:pt-5">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-gray-500">
+              &copy; 2024 Marek Zelinka
+            </p>
+            <Link
+              to="https://github.com/marekzelinka/work-journal"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm font-medium text-gray-500 hover:text-gray-200"
+            >
+              Source code
+            </Link>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }
