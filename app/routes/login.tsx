@@ -1,9 +1,10 @@
 import {
+  json,
   redirect,
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
 } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import { commitSession, getSession } from "~/session";
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -26,12 +27,24 @@ export async function action({ request }: ActionFunctionArgs) {
       },
     });
   } else {
-    return null;
+    let error: string;
+
+    if (!email) {
+      error = "Email is required.";
+    } else if (!password) {
+      error = "Password is required.";
+    } else {
+      error = "Invalid login";
+    }
+
+    return json({ error }, { status: 401 });
   }
 }
 
 export default function Component() {
   const data = useLoaderData<typeof loader>();
+
+  const actionData = useActionData<typeof action>();
 
   return (
     <>
@@ -61,6 +74,9 @@ export default function Component() {
           >
             Login
           </button>
+          {actionData?.error ? (
+            <p className="mt-4 font-medium text-red-500">{actionData.error}</p>
+          ) : null}
         </Form>
       )}
     </>
