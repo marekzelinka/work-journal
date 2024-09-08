@@ -1,12 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import {
   type ActionFunctionArgs,
+  type LoaderFunctionArgs,
   type MetaFunction,
   type SerializeFrom,
 } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { format, parseISO, startOfWeek } from "date-fns";
 import { EntryForm } from "~/components/entry-form";
+import { getSession } from "~/session";
 
 export const meta: MetaFunction = () => {
   return [
@@ -15,15 +17,20 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export async function loader() {
+export async function loader({ request }: LoaderFunctionArgs) {
+  const session = await getSession(request.headers.get("cookie"));
+
   const db = new PrismaClient();
 
   const entries = await db.entry.findMany();
 
-  return entries.map((entry) => ({
-    ...entry,
-    date: entry.date.toISOString().substring(0, 10),
-  }));
+  return {
+    session: session.data,
+    entries: entries.map((entry) => ({
+      ...entry,
+      date: entry.date.toISOString().substring(0, 10),
+    })),
+  };
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -46,7 +53,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Component() {
-  const entries = useLoaderData<typeof loader>();
+  const { session, entries } = useLoaderData<typeof loader>();
 
   const entriesByWeek = entries.reduce<Record<string, typeof entries>>(
     (memo, entry) => {
@@ -75,12 +82,14 @@ export default function Component() {
 
   return (
     <>
-      <div className="border p-3">
-        <p className="italic">Create a new entry</p>
-        <div className="mt-2">
-          <EntryForm />
+      {session.isAdmin ? (
+        <div className="border p-3">
+          <p className="italic">Create a new entry</p>
+          <div className="mt-2">
+            <EntryForm />
+          </div>
         </div>
-      </div>
+      ) : null}
       <div className="mt-12 space-y-12">
         {weeks.map((week) => (
           <div key={week.dateString}>
@@ -129,7 +138,7 @@ export default function Component() {
 function EntryListItem({
   entry,
 }: {
-  entry: SerializeFrom<typeof loader>[number];
+  entry: SerializeFrom<typeof loader>["entries"][number];
 }) {
   return (
     <li className="group">
