@@ -10,6 +10,7 @@ import { getSession } from "~/session";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get("cookie"));
+
   if (!session.data.isAdmin) {
     throw new Response("Not authenticated", {
       status: 401,
@@ -77,11 +78,11 @@ export default function Component() {
 
   return (
     <>
-      <div className="mb-8 rounded-lg border border-gray-700/30 bg-gray-800/50 p-4 lg:mb-20 lg:p-6">
+      <div className="rounded-lg border border-gray-700/30 bg-gray-800/50 p-4 lg:p-6">
         <p className="text-sm font-medium text-gray-500 lg:text-base">
           Create a new entry
         </p>
-        <div className="mt-4">
+        <div className="mt-4 lg:mt-2">
           <EntryForm entry={entry} />
         </div>
       </div>
@@ -100,7 +101,7 @@ export default function Component() {
             type="submit"
             name="_action"
             value="delete"
-            className="text-sm text-gray-600 underline"
+            className="text-sm text-red-600 underline hover:text-red-500"
           >
             Delete this entry…
           </button>
