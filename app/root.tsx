@@ -41,7 +41,7 @@ export function ErrorBoundary() {
       <p className="text-3xl">Whoops!</p>
       {isRouteErrorResponse(error) ? (
         <p>
-          {error.status} - {error.statusText}
+          {error.status} - {error.statusText || error.data}
         </p>
       ) : error instanceof Error ? (
         <p>{error.message}</p>
