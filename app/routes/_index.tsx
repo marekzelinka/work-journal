@@ -1,23 +1,29 @@
+import { CloudIcon } from "@heroicons/react/20/solid";
 import { PrismaClient } from "@prisma/client";
 import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
-  type SerializeFrom,
 } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
-import { format, parseISO, startOfWeek } from "date-fns";
+import { Link, useFetchers, useLoaderData } from "@remix-run/react";
+import { compareDesc, format, parseISO, startOfWeek } from "date-fns";
 import { EntryForm } from "~/components/entry-form";
 import { getSession } from "~/session";
 
-type LoaderData = SerializeFrom<typeof loader>;
-type Entry = LoaderData["entries"][number];
+const DELAY = 500;
+
+type Entry = Awaited<ReturnType<typeof loader>>["entries"][number];
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  await new Promise((resolve) => setTimeout(resolve, DELAY));
+
   const session = await getSession(request.headers.get("cookie"));
 
   const db = new PrismaClient();
 
-  const entries = await db.entry.findMany({ orderBy: { date: "desc" } });
+  const entries = await db.entry.findMany({
+    select: { id: true, date: true, type: true, text: true },
+    orderBy: { date: "desc" },
+  });
 
   return {
     session: session.data,
@@ -29,7 +35,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, DELAY));
 
   const session = await getSession(request.headers.get("cookie"));
 
@@ -43,34 +49,40 @@ export async function action({ request }: ActionFunctionArgs) {
   const db = new PrismaClient();
 
   const fromData = await request.formData();
-  const { date, type, text } = Object.fromEntries(fromData);
+  const { id, date, type, text } = validate(Object.fromEntries(fromData));
 
-  if (
-    typeof date !== "string" ||
-    typeof type !== "string" ||
-    typeof text !== "string"
-  ) {
-    throw new Error("Bad request");
-  }
-
-  return await db.entry.create({ data: { date: new Date(date), type, text } });
+  return await db.entry.create({
+    data: { id, date: new Date(date), type, text },
+  });
 }
 
 export default function Component() {
   const { session, entries } = useLoaderData<typeof loader>();
 
-  const entriesByWeek = entries.reduce<Record<string, typeof entries>>(
-    (memo, entry) => {
-      const sunday = startOfWeek(parseISO(entry.date));
-      const sundayString = format(sunday, "yyyy-MM-dd");
+  const entriesById = new Map(entries.map((entry) => [entry.id, entry]));
 
-      memo[sundayString] ||= [];
-      memo[sundayString].push(entry);
+  // Merge optimistic and existing entries
+  const optimisticEntries = useOptimisticEntries();
+  for (const optimisticEntry of optimisticEntries) {
+    const entry = entriesById.get(optimisticEntry.id);
+    const merged = entry ? { ...entry, ...optimisticEntry } : optimisticEntry;
+    entriesById.set(optimisticEntry.id, merged);
+  }
 
-      return memo;
-    },
-    {},
+  const entriesToShow = [...entriesById.values()].sort((a, b) =>
+    compareDesc(a.date, b.date),
   );
+
+  // Group entries by week
+  const entriesByWeek: Record<string, Array<(typeof entries)[number]>> = {};
+  for (const entry of entriesToShow) {
+    const sunday = startOfWeek(entry.date);
+    const sundayString = format(sunday, "yyyy-MM-dd");
+
+    entriesByWeek[sundayString] ||= [];
+    entriesByWeek[sundayString].push(entry);
+  }
+
   const weeks = Object.keys(entriesByWeek).map((dateString) => ({
     dateString,
     entriesByType: {
@@ -78,7 +90,7 @@ export default function Component() {
       Learnings: entriesByWeek[dateString].filter(
         (entry) => entry.type === "learning",
       ),
-      "Interesting things": entriesByWeek[dateString].filter(
+      "Interesting Things": entriesByWeek[dateString].filter(
         (entry) => entry.type === "interesting-thing",
       ),
     },
@@ -88,9 +100,14 @@ export default function Component() {
     <>
       {session.isAdmin ? (
         <div className="rounded-lg border border-gray-700/30 bg-gray-800/50 p-4 lg:p-6">
-          <p className="text-sm font-medium text-gray-500 lg:text-base">
-            Create a new entry
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-gray-500 lg:text-base">
+              Create a new entry
+            </p>
+            {optimisticEntries.length > 0 && (
+              <CloudIcon className="size-4 text-gray-500" />
+            )}
+          </div>
           <div className="mt-4 lg:mt-2">
             <EntryForm />
           </div>
@@ -128,6 +145,25 @@ export default function Component() {
   );
 }
 
+function useOptimisticEntries() {
+  type OptimisticEntryFetcher = ReturnType<typeof useFetchers>[number] & {
+    formData: FormData;
+  };
+
+  return useFetchers()
+    .filter(
+      (fetcher): fetcher is OptimisticEntryFetcher =>
+        fetcher.formData !== undefined,
+    )
+    .map((fetcher): Entry => {
+      const { id, date, type, text } = validate(
+        Object.fromEntries(fetcher.formData),
+      );
+
+      return { id, date, type, text };
+    });
+}
+
 function EntryListItem({ entry }: { entry: Entry }) {
   const { session } = useLoaderData<typeof loader>();
 
@@ -144,4 +180,19 @@ function EntryListItem({ entry }: { entry: Entry }) {
       ) : null}
     </li>
   );
+}
+
+function validate(data: Record<string, FormDataEntryValue>) {
+  const { id, date, type, text } = data;
+
+  if (
+    typeof id !== "string" ||
+    typeof date !== "string" ||
+    typeof type !== "string" ||
+    typeof text !== "string"
+  ) {
+    throw new Error("Bad data");
+  }
+
+  return { id, date, type, text };
 }
