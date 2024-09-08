@@ -11,19 +11,22 @@ import { getSession } from "~/session";
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get("cookie"));
   if (!session.data.isAdmin) {
-    throw new Response("Not authenticated", { status: 401 });
+    throw new Response("Not authenticated", {
+      status: 401,
+      statusText: "Not authenticated",
+    });
   }
 
   const db = new PrismaClient();
 
   if (typeof params.entryId !== "string") {
-    throw new Response("Not Found", { status: 404 });
+    throw new Response("Not Found", { status: 404, statusText: "Not Found" });
   }
 
   const entry = await db.entry.findUnique({ where: { id: params.entryId } });
 
   if (!entry) {
-    throw new Response("Not Found", { status: 404 });
+    throw new Response("Not Found", { status: 404, statusText: "Not Found" });
   }
 
   return { ...entry, date: entry.date.toISOString().substring(0, 10) };
@@ -34,7 +37,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   const session = await getSession(request.headers.get("cookie"));
   if (!session.data.isAdmin) {
-    throw new Response("Not authenticated", { status: 401 });
+    throw new Response("Not authenticated", {
+      status: 401,
+      statusText: "Not authenticated",
+    });
   }
 
   const db = new PrismaClient();
@@ -54,7 +60,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
 
     if (typeof params.entryId !== "string") {
-      throw new Response("Not Found", { status: 404 });
+      throw new Response("Not Found", { status: 404, statusText: "Not Found" });
     }
 
     await db.entry.update({

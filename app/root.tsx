@@ -5,6 +5,7 @@ import {
 } from "@remix-run/node";
 import {
   Form,
+  isRouteErrorResponse,
   Link,
   Links,
   Meta,
@@ -12,6 +13,7 @@ import {
   Scripts,
   ScrollRestoration,
   useLoaderData,
+  useRouteError,
 } from "@remix-run/react";
 import type { ReactNode } from "react";
 import { destroySession, getSession } from "./session";
@@ -33,9 +35,26 @@ export async function action({ request }: ActionFunctionArgs) {
   });
 }
 
-export function Layout({ children }: { children: ReactNode }) {
-  const { session } = useLoaderData<typeof loader>();
+export function ErrorBoundary() {
+  const error = useRouteError();
 
+  return (
+    <div className="flex h-full flex-col items-center justify-center">
+      <p className="text-3xl">Whoops!</p>
+      {isRouteErrorResponse(error) ? (
+        <p>
+          {error.status} - {error.statusText}
+        </p>
+      ) : error instanceof Error ? (
+        <p>{error.message}</p>
+      ) : (
+        <p>Something bad happend.</p>
+      )}
+    </div>
+  );
+}
+
+export function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="h-full">
       <head>
@@ -44,25 +63,8 @@ export function Layout({ children }: { children: ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="bg-gray-900 text-gray-200 antialiased">
-        <div className="p-10">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-5xl">Work Journal</h1>
-              <p className="mt-2 text-lg text-gray-400">
-                Learnings and doings. Updated weekly.
-              </p>
-            </div>
-            {session.isAdmin ? (
-              <Form method="POST">
-                <button type="submit">Sign out</button>
-              </Form>
-            ) : (
-              <Link to="/login">Login</Link>
-            )}
-          </div>
-          <div className="mt-8">{children}</div>
-        </div>
+      <body className="h-full bg-gray-900 text-gray-200 antialiased">
+        {children}
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -71,5 +73,28 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 export default function Component() {
-  return <Outlet />;
+  const { session } = useLoaderData<typeof loader>();
+
+  return (
+    <div className="p-10">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-5xl">Work Journal</h1>
+          <p className="mt-2 text-lg text-gray-400">
+            Learnings and doings. Updated weekly.
+          </p>
+        </div>
+        {session.isAdmin ? (
+          <Form method="POST">
+            <button type="submit">Sign out</button>
+          </Form>
+        ) : (
+          <Link to="/login">Login</Link>
+        )}
+      </div>
+      <div className="mt-8">
+        <Outlet />
+      </div>
+    </div>
+  );
 }
