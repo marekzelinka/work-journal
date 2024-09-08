@@ -24,8 +24,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
   await requiredSignedAdmin(request);
 
   const fromData = await request.formData();
