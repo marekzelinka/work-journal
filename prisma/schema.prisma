@@ -17,4 +17,5 @@ model Entry {
   date      DateTime
   type      String
   text      String
+  link      String?
 }

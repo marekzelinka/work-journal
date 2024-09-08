@@ -6,6 +6,7 @@ import {
   Label,
   Textarea,
 } from "@headlessui/react";
+import { LinkIcon } from "@heroicons/react/20/solid";
 import { Form, useSubmit } from "@remix-run/react";
 import { format } from "date-fns";
 import { useRef } from "react";
@@ -17,7 +18,8 @@ export function EntryForm({
 }) {
   const submit = useSubmit();
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textRef = useRef<HTMLTextAreaElement>(null);
+  const linkRef = useRef<HTMLInputElement>(null);
 
   return (
     <Form
@@ -37,9 +39,11 @@ export function EntryForm({
           },
         );
 
-        if (textareaRef.current) {
-          textareaRef.current.value = "";
-          textareaRef.current.focus();
+        if (textRef.current && linkRef.current) {
+          textRef.current.value = "";
+          textRef.current.focus();
+
+          linkRef.current.value = "";
         }
       }}
     >
@@ -53,6 +57,7 @@ export function EntryForm({
               required
               defaultValue={entry?.date ?? format(new Date(), "yyyy-MM-dd")}
               className="block w-full rounded-md border border-gray-700 bg-gray-800 text-white data-[focus]:border-sky-600 data-[focus]:ring-sky-600"
+              aria-label="Date"
             />
           </div>
           <div className="flex gap-4 lg:gap-6">
@@ -79,7 +84,7 @@ export function EntryForm({
         </div>
         <div>
           <Textarea
-            ref={textareaRef}
+            ref={textRef}
             name="text"
             id="text"
             required
@@ -104,6 +109,21 @@ export function EntryForm({
             aria-label="Entry"
           />
         </div>
+        <div className="relative">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <LinkIcon className="size-5 text-gray-400" />
+          </div>
+          <Input
+            ref={linkRef}
+            type="url"
+            name="link"
+            id="link"
+            // defaultValue={entry?.link}
+            className="block w-full rounded-md border border-gray-700 bg-gray-800 pl-10 text-white data-[focus]:border-sky-600 data-[focus]:ring-sky-600"
+            placeholder="Optional link"
+            aria-label="Link"
+          />
+        </div>
         <div className="lg:flex lg:justify-end">
           <Button
             type="submit"
@@ -118,7 +138,7 @@ export function EntryForm({
 }
 
 function validate(data: Record<string, FormDataEntryValue>) {
-  const { date, type, text } = data;
+  const { date, type, text, link } = data;
 
   if (
     typeof date !== "string" ||
@@ -128,5 +148,5 @@ function validate(data: Record<string, FormDataEntryValue>) {
     throw new Error("Bad data");
   }
 
-  return { date, type, text };
+  return { date, type, text, link: typeof link === "string" ? link : "" };
 }

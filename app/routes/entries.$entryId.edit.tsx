@@ -14,7 +14,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   await requiredSignedAdmin(request);
 
   invariant(params.entryId, "entryId is missing");
-  const entry = await db.entry.findUnique({ where: { id: params.entryId } });
+  const entry = await db.entry.findUnique({
+    select: { id: true, date: true, type: true, text: true, link: true },
+    where: { id: params.entryId },
+  });
   invariantResponse(entry, "Not Found");
 
   return { ...entry, date: entry.date.toISOString().substring(0, 10) };
@@ -29,7 +32,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const { _action, date, type, text } = Object.fromEntries(fromData);
 
   if (_action === "delete") {
-    await db.entry.delete({ where: { id: params.entryId } });
+    await db.entry.delete({
+      select: { id: true },
+      where: { id: params.entryId },
+    });
   } else {
     if (
       typeof date !== "string" ||
@@ -41,6 +47,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
     invariant(params.entryId, "entryId is missing");
     await db.entry.update({
+      select: { id: true },
       where: { id: params.entryId },
       data: { date: new Date(date), type, text },
     });
@@ -86,7 +93,7 @@ export default function Component() {
             type="submit"
             name="_action"
             value="delete"
-            className="text-sm text-red-400 underline hover:text-red-200"
+            className="text-sm text-red-400 hover:text-red-200"
           >
             Delete this entry…
           </button>

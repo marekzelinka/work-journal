@@ -15,7 +15,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const isAdmin = await getSignedAdmin(request);
 
   const entries = await db.entry.findMany({
-    select: { id: true, date: true, type: true, text: true },
+    select: { id: true, date: true, type: true, text: true, link: true },
     orderBy: { date: "desc" },
   });
 
@@ -32,10 +32,10 @@ export async function action({ request }: ActionFunctionArgs) {
   await requiredSignedAdmin(request);
 
   const fromData = await request.formData();
-  const { id, date, type, text } = validate(Object.fromEntries(fromData));
+  const { id, date, type, text, link } = validate(Object.fromEntries(fromData));
 
   return await db.entry.create({
-    data: { id, date: new Date(date), type, text },
+    data: { id, date: new Date(date), type, text, link: link || null },
   });
 }
 
@@ -139,11 +139,11 @@ function useOptimisticEntries() {
         fetcher.formData !== undefined,
     )
     .map((fetcher): Entry => {
-      const { id, date, type, text } = validate(
+      const { id, date, type, text, link } = validate(
         Object.fromEntries(fetcher.formData),
       );
 
-      return { id, date, type, text };
+      return { id, date, type, text, link };
     });
 }
 
@@ -153,6 +153,14 @@ function EntryListItem({ entry }: { entry: Entry }) {
   return (
     <li className="group leading-7">
       {entry.text}
+      {entry.link ? (
+        <Link
+          to={entry.link}
+          className="ml-2 text-sky-500 underline underline-offset-4"
+        >
+          Link
+        </Link>
+      ) : null}
       {isAdmin ? (
         <Link
           to={`/entries/${entry.id}/edit`}
@@ -166,16 +174,17 @@ function EntryListItem({ entry }: { entry: Entry }) {
 }
 
 function validate(data: Record<string, FormDataEntryValue>) {
-  const { id, date, type, text } = data;
+  const { id, date, type, text, link } = data;
 
   if (
     typeof id !== "string" ||
     typeof date !== "string" ||
     typeof type !== "string" ||
-    typeof text !== "string"
+    typeof text !== "string" ||
+    typeof link !== "string"
   ) {
     throw new Error("Bad data");
   }
 
-  return { id, date, type, text };
+  return { id, date, type, text, link };
 }
