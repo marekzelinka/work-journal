@@ -47,38 +47,42 @@ export default function Component() {
   const actionData = useActionData<typeof action>();
 
   return (
-    <>
+    <div className="mx-auto mt-8 max-w-xs lg:max-w-sm">
       {data.isAdmin ? (
         <p>You&apos;re signed in!</p>
       ) : (
         <Form method="POST">
-          <input
-            type="email"
-            name="email"
-            id="email"
-            className="text-gray-900"
-            placeholder="Email"
-            aria-label="Email"
-          />
-          <input
-            type="password"
-            name="password"
-            id="password"
-            className="text-gray-900"
-            placeholder="Password"
-            aria-label="Password"
-          />
-          <button
-            type="submit"
-            className="inline-flex bg-blue-500 px-3 py-2 font-medium text-white"
-          >
-            Login
-          </button>
+          <div className="space-y-2">
+            <input
+              type="email"
+              name="email"
+              id="email"
+              className="w-full rounded-md border-gray-700 bg-gray-800 text-white focus:border-sky-600 focus:ring-sky-600"
+              placeholder="Email"
+              aria-label="Email"
+            />
+            <input
+              type="password"
+              name="password"
+              id="password"
+              className="w-full rounded-md border-gray-700 bg-gray-800 text-white focus:border-sky-600 focus:ring-sky-600"
+              placeholder="Password"
+              aria-label="Password"
+            />
+          </div>
+          <div className="mt-8">
+            <button
+              type="submit"
+              className="w-full rounded-md bg-sky-600 px-3 py-2 font-medium text-white focus:outline-none focus:ring-2 focus:ring-sky-600 focus:ring-offset-2 focus:ring-offset-gray-900"
+            >
+              Login
+            </button>
+          </div>
           {actionData?.error ? (
             <p className="mt-4 font-medium text-red-500">{actionData.error}</p>
           ) : null}
         </Form>
       )}
-    </>
+    </div>
   );
 }

@@ -76,10 +76,14 @@ export default function Component() {
   const entry = useLoaderData<typeof loader>();
 
   return (
-    <div>
-      <p>Editing entry {entry.id}</p>
-      <div className="mt-8">
-        <EntryForm entry={entry} />
+    <>
+      <div className="mb-8 rounded-lg border border-gray-700/30 bg-gray-800/50 p-4 lg:mb-20 lg:p-6">
+        <p className="text-sm font-medium text-gray-500 lg:text-base">
+          Create a new entry
+        </p>
+        <div className="mt-4">
+          <EntryForm entry={entry} />
+        </div>
       </div>
       <div className="mt-8">
         <Form
@@ -96,12 +100,12 @@ export default function Component() {
             type="submit"
             name="_action"
             value="delete"
-            className="text-gray-500 underline"
+            className="text-sm text-gray-600 underline"
           >
             Delete this entry…
           </button>
         </Form>
       </div>
-    </div>
+    </>
   );
 }

@@ -24,18 +24,18 @@ export function EntryForm({
   return (
     <fetcher.Form method="POST">
       <fieldset disabled={isSaving} className="disabled:opacity-70">
-        <div>
-          <div>
+        <div className="lg:flex lg:items-center lg:justify-between">
+          <div className="lg:order-2">
             <input
               type="date"
               name="date"
               id="date"
               required
               defaultValue={entry?.date ?? format(new Date(), "yyyy-MM-dd")}
-              className="text-gray-900"
+              className="w-full rounded-md border border-gray-700 bg-gray-800 text-white focus:border-sky-600 focus:ring-sky-600"
             />
           </div>
-          <div className="mt-4 flex gap-4">
+          <div className="mt-6 flex gap-4 lg:mt-0 lg:gap-6">
             {[
               { label: "Work", value: "work" },
               { label: "Learning", value: "learning" },
@@ -44,7 +44,7 @@ export function EntryForm({
               <label
                 key={option.value}
                 htmlFor={option.value}
-                className="flex items-center gap-1"
+                className="flex items-center gap-2 text-sm text-white lg:text-base"
               >
                 <input
                   type="radio"
@@ -53,27 +53,29 @@ export function EntryForm({
                   required
                   defaultChecked={option.value === (entry?.type ?? "work")}
                   value={option.value}
+                  className="border-gray-700 bg-gray-800 text-sky-600 focus:border-sky-600 focus:ring-sky-600 focus:ring-offset-gray-900"
                 />
                 {option.label}
               </label>
             ))}
           </div>
         </div>
-        <div className="mt-4">
+        <div className="mt-6">
           <textarea
             ref={textareaRef}
             name="text"
             id="text"
             defaultValue={entry?.text}
-            className="w-full text-gray-700"
+            rows={3}
+            className="w-full rounded-md border-gray-700 bg-gray-800 text-white focus:border-sky-600 focus:ring-sky-600"
             placeholder="Type your entry..."
             aria-label="Entry"
           />
         </div>
-        <div className="mt-2 text-right">
+        <div className="mt-6">
           <button
             type="submit"
-            className="bg-blue-500 px-4 py-1 font-semibold text-white"
+            className="w-full rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-600 focus:ring-offset-2 focus:ring-offset-gray-900 lg:py-1.5"
           >
             {isSaving ? "Saving…" : "Save"}
           </button>

@@ -9,6 +9,9 @@ import { format, parseISO, startOfWeek } from "date-fns";
 import { EntryForm } from "~/components/entry-form";
 import { getSession } from "~/session";
 
+type LoaderData = SerializeFrom<typeof loader>;
+type Entry = LoaderData["entries"][number];
+
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get("cookie"));
 
@@ -83,62 +86,31 @@ export default function Component() {
   return (
     <>
       {session.isAdmin ? (
-        <div className="border p-3">
-          <p className="italic">Create a new entry</p>
-          <div className="mt-2">
+        <div className="mb-8 rounded-lg border border-gray-700/30 bg-gray-800/50 p-4 lg:mb-20 lg:p-6">
+          <p className="text-sm font-medium text-gray-500 lg:text-base">
+            Create a new entry
+          </p>
+          <div className="mt-4">
             <EntryForm />
           </div>
         </div>
       ) : null}
-      <div className="mt-12 space-y-12">
+      <div className="mt-12 space-y-12 border-l-2 border-sky-500/[.15] pl-5 lg:space-y-20 lg:pl-8">
         {weeks.map((week) => (
-          <div key={week.dateString}>
-            <p className="font-bold">
-              Week of {format(parseISO(week.dateString), "MMMM do")}
+          <div key={week.dateString} className="relative">
+            <div className="absolute left-[-34px] rounded-full bg-gray-900 p-2 lg:left-[-46px]">
+              <div className="size-[10px] rounded-full border border-sky-500 bg-gray-900" />
+            </div>
+            <p className="pt-[5px] text-xs font-semibold uppercase tracking-wider text-sky-500 lg:pt-[3px] lg:text-sm">
+              Week of {format(parseISO(week.dateString), "MMMM d, yyyy")}
             </p>
-            <div className="mt-3 space-y-4">
-              {week.work.length ? (
-                <div>
-                  <p>Work</p>
-                  <ul className="ml-8 list-disc">
-                    {week.work.map((entry) => (
-                      <EntryListItem
-                        key={entry.id}
-                        entry={entry}
-                        canEdit={session.isAdmin}
-                      />
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-              {week.learnings.length ? (
-                <div>
-                  <p>Learning</p>
-                  <ul className="ml-8 list-disc">
-                    {week.learnings.map((entry) => (
-                      <EntryListItem
-                        key={entry.id}
-                        entry={entry}
-                        canEdit={session.isAdmin}
-                      />
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-              {week.interestingThings.length ? (
-                <div>
-                  <p>Interesting things</p>
-                  <ul className="ml-8 list-disc">
-                    {week.interestingThings.map((entry) => (
-                      <EntryListItem
-                        key={entry.id}
-                        entry={entry}
-                        canEdit={session.isAdmin}
-                      />
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
+            <div className="mt-6 space-y-8 lg:space-y-12">
+              <EntryList entries={week.work} label="Work" />
+              <EntryList entries={week.learnings} label="Learnings" />
+              <EntryList
+                entries={week.interestingThings}
+                label="Interesting things"
+              />
             </div>
           </div>
         ))}
@@ -147,20 +119,29 @@ export default function Component() {
   );
 }
 
-function EntryListItem({
-  entry,
-  canEdit,
-}: {
-  entry: SerializeFrom<typeof loader>["entries"][number];
-  canEdit: boolean;
-}) {
+function EntryList({ entries, label }: { entries: Entry[]; label: string }) {
+  return !entries.length ? null : (
+    <div>
+      <p className="font-semibold text-white">{label}</p>
+      <ul className="mt-4 space-y-6">
+        {entries.map((entry) => (
+          <EntryListItem key={entry.id} entry={entry} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function EntryListItem({ entry }: { entry: Entry }) {
+  const { session } = useLoaderData<typeof loader>();
+
   return (
-    <li className="group">
+    <li className="group leading-7">
       {entry.text}
-      {canEdit ? (
+      {session.isAdmin ? (
         <Link
           to={`/entries/${entry.id}/edit`}
-          className="ml-2 text-blue-500 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
+          className="ml-2 text-sky-500 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
         >
           Edit
         </Link>

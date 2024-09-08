@@ -68,7 +68,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="h-full bg-gray-900 text-gray-200 antialiased">
+      <body className="h-full bg-gray-900 text-gray-400 antialiased [color-scheme:dark] [font-synthesis:none]">
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -81,23 +81,41 @@ export default function Component() {
   const { session } = useLoaderData<typeof loader>();
 
   return (
-    <div className="p-10">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-5xl">Work Journal</h1>
-          <p className="mt-2 text-lg text-gray-400">
-            Learnings and doings. Updated weekly.
+    <div className="mx-auto max-w-xl p-4 lg:max-w-7xl">
+      <header>
+        <div className="flex items-center justify-between lg:border-b lg:border-gray-800 lg:pb-5 lg:pt-1">
+          <p className="text-sm uppercase lg:text-lg">
+            <span className="text-gray-500">Sam</span>
+            <span className="font-semibold text-gray-200">Selikoff</span>
+          </p>
+          {session.isAdmin ? (
+            <Form method="POST">
+              <button
+                type="submit"
+                className="text-sm font-medium text-gray-500 hover:text-gray-200"
+              >
+                Sign out
+              </button>
+            </Form>
+          ) : (
+            <Link
+              to="/login"
+              className="text-sm font-medium text-gray-500 hover:text-gray-200"
+            >
+              Login
+            </Link>
+          )}
+        </div>
+        <div className="my-20 text-center lg:my-28">
+          <h1 className="text-5xl font-semibold tracking-tighter text-white lg:text-7xl">
+            <Link to="/">Work Journal</Link>
+          </h1>
+          <p className="mt-2 tracking-tight text-gray-500 lg:mt-4 lg:text-2xl">
+            Doings and learnings. Updated weekly.
           </p>
         </div>
-        {session.isAdmin ? (
-          <Form method="POST">
-            <button type="submit">Sign out</button>
-          </Form>
-        ) : (
-          <Link to="/login">Login</Link>
-        )}
-      </div>
-      <div className="mt-8">
+      </header>
+      <div className="mx-auto max-w-3xl">
         <Outlet />
       </div>
     </div>
