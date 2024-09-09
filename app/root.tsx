@@ -74,69 +74,63 @@ export default function Component() {
   const { isAdmin } = useLoaderData<typeof loader>();
 
   return (
-    <div className="flex h-full flex-col">
-      <nav className="px-4 lg:px-6">
-        <div className="mx-auto max-w-xl pt-4 lg:max-w-7xl lg:border-b lg:border-gray-800 lg:pb-5 lg:pt-5">
-          <div className="flex items-center justify-between">
-            <Link
-              to="https://www.linkedin.com/in/marekzelinka/"
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm uppercase lg:text-lg"
-            >
-              <span className="text-gray-500">Marek</span>
-              <span className="font-semibold text-gray-200">Zelinka</span>
-            </Link>
-            {isAdmin ? (
-              <Form method="POST">
-                <button
-                  type="submit"
-                  className="text-sm font-medium text-gray-400 hover:text-gray-200"
-                >
-                  Sign out
-                </button>
-              </Form>
-            ) : (
-              <Link
-                to="/login"
+    <div className="mx-auto flex h-full max-w-3xl flex-col p-4 lg:max-w-7xl lg:px-6">
+      <nav className="lg:border-b lg:border-gray-800 lg:pb-4">
+        <div className="flex items-center justify-between">
+          <Link
+            to="https://www.linkedin.com/in/marekzelinka/"
+            target="_blank"
+            rel="noreferrer"
+            className="text-sm uppercase lg:text-lg"
+          >
+            <span className="text-gray-500">Marek</span>
+            <span className="font-semibold text-gray-200">Zelinka</span>
+          </Link>
+          {isAdmin ? (
+            <Form method="POST">
+              <button
+                type="submit"
                 className="text-sm font-medium text-gray-400 hover:text-gray-200"
               >
-                Login
-              </Link>
-            )}
-          </div>
+                Sign out
+              </button>
+            </Form>
+          ) : (
+            <Link
+              to="/login"
+              className="text-sm font-medium text-gray-400 hover:text-gray-200"
+            >
+              Login
+            </Link>
+          )}
         </div>
       </nav>
       <header className="my-20 lg:my-28">
-        <div className="mx-auto max-w-xl px-4 lg:max-w-7xl lg:px-6">
-          <div className="text-center">
-            <h1 className="text-5xl font-semibold tracking-tighter text-white lg:text-7xl">
-              <Link to="/">Work Journal</Link>
-            </h1>
-            <p className="mt-2 tracking-tight text-gray-500 lg:mt-4 lg:text-2xl">
-              Doings and learnings. Updated weekly.
-            </p>
-          </div>
+        <div className="text-center">
+          <h1 className="text-5xl font-semibold tracking-tighter text-white lg:text-7xl">
+            <Link to="/">Work Journal</Link>
+          </h1>
+          <p className="mt-2 tracking-tight text-gray-500 lg:mt-4 lg:text-2xl">
+            Doings and learnings. Updated weekly.
+          </p>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-12 lg:px-6">
+      <main className="mx-auto w-full max-w-3xl flex-1 pb-12">
         <Outlet />
       </main>
-      <footer className="px-4 lg:px-6">
-        <div className="mx-auto max-w-xl pb-4 lg:max-w-7xl lg:border-t lg:border-gray-800 lg:pb-5 lg:pt-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-gray-500">
-              &copy; 2024 Marek Zelinka
-            </p>
-            <Link
-              to="https://github.com/marekzelinka/work-journal"
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm font-medium text-gray-500 hover:text-gray-200"
-            >
-              Source code
-            </Link>
-          </div>
+      <footer className="pb-4 lg:border-t lg:border-gray-800 lg:pt-4">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-gray-500">
+            &copy; 2024 Marek Zelinka
+          </p>
+          <Link
+            to="https://github.com/marekzelinka/work-journal"
+            target="_blank"
+            rel="noreferrer"
+            className="text-sm font-medium text-gray-500 hover:text-gray-200"
+          >
+            Source code
+          </Link>
         </div>
       </footer>
     </div>
