@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for work-journal-polished-morning-5310 on 2024-09-08T20:57:01+02:00
+# fly.toml app configuration file generated for work-journal-cool-snow-7183 on 2024-09-09T08:26:28+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'work-journal-polished-morning-5310'
-primary_region = 'ams'
+app = 'work-journal-cool-snow-7183'
+primary_region = 'waw'
 
 [build]
 
