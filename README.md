@@ -1,40 +1,35 @@
-# Welcome to Remix!
+# Work Journal
 
-- 📖 [Remix docs](https://remix.run/docs)
+This is my personal work journal.
 
-## Development
+## Get started
 
-Run the dev server:
+1. Clone the repository:
 
-```shellscript
-npm run dev
-```
+   ```sh
+   git clone https://github.com/marekzelinka/work-journal.git
+   ```
 
-## Deployment
+2. Install the dependencies:
 
-First, build your app for production:
+   ```sh
+   npm install
+   ```
 
-```sh
-npm run build
-```
+3. Define required env variables:
 
-Then run the app in production mode:
+   - Copy the template contents in [.env.example](.env.example) to a new file named `.env` and fill all the required fields.
 
-```sh
-npm start
-```
+4. Run the application in dev mode:
 
-Now you'll need to pick a host to deploy it to.
+   ```sh
+   npm run dev
+   ```
 
-### DIY
+## Goals
 
-If you're familiar with deploying Node applications, the built-in Remix app server is production-ready.
+Practice working with Remix [data loadings APIs](https://remix.run/docs/en/main/guides/data-loading) and [Prisma ORM](https://www.prisma.io/).
 
-Make sure to deploy the output of `npm run build`
+## Credits
 
-- `build/server`
-- `build/client`
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever css framework you prefer. See the [Vite docs on css](https://vitejs.dev/guide/features.html#css) for more information.
+- App idea from [Build UI](https://buildui.com/courses/ship-an-app-with-remix) Remix course, called [Ship an app with Remix](https://buildui.com/courses/ship-an-app-with-remix)
