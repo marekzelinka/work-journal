@@ -7,15 +7,20 @@ import {
   Textarea,
 } from "@headlessui/react";
 import { LinkIcon } from "@heroicons/react/20/solid";
-import { Form, useSubmit } from "@remix-run/react";
+import { Form, useNavigation, useSubmit } from "@remix-run/react";
 import { format } from "date-fns";
 import { useRef } from "react";
 
 export function EntryForm({
   entry,
 }: {
-  entry?: { text: string; date: string; type: string };
+  entry?: { text: string; date: string; type: string; link: string | null };
 }) {
+  const editMode = Boolean(entry);
+
+  const navigation = useNavigation();
+  const savingEdits = navigation.state !== "idle";
+
   const submit = useSubmit();
 
   const textRef = useRef<HTMLTextAreaElement>(null);
@@ -25,6 +30,10 @@ export function EntryForm({
     <Form
       method="POST"
       onSubmit={(event) => {
+        if (editMode) {
+          return;
+        }
+
         event.preventDefault();
 
         const formData = new FormData(event.currentTarget);
@@ -47,7 +56,11 @@ export function EntryForm({
         }
       }}
     >
-      <Fieldset className="space-y-6" aria-label="New entry">
+      <Fieldset
+        disabled={savingEdits}
+        className="space-y-6 data-[disabled]:pointer-events-none data-[disabled]:opacity-70"
+        aria-label="New entry"
+      >
         <div className="max-lg:space-y-6 lg:flex lg:items-center lg:justify-between">
           <div className="lg:order-last">
             <Input
@@ -118,7 +131,7 @@ export function EntryForm({
             type="url"
             name="link"
             id="link"
-            // defaultValue={entry?.link}
+            defaultValue={entry?.link ?? undefined}
             className="block w-full rounded-md border border-gray-700 bg-gray-800 pl-10 text-white data-[focus]:border-sky-600 data-[focus]:ring-sky-600"
             placeholder="Optional link"
             aria-label="Link"
@@ -129,7 +142,7 @@ export function EntryForm({
             type="submit"
             className="w-full rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white focus:outline-none data-[hover]:bg-sky-500 data-[focus]:ring-2 data-[focus]:ring-sky-600 data-[focus]:ring-offset-2 data-[focus]:ring-offset-gray-900 lg:w-auto lg:py-1.5"
           >
-            Save
+            {savingEdits ? "Saving…" : "Save"}
           </Button>
         </div>
       </Fieldset>
