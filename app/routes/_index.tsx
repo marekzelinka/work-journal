@@ -111,7 +111,7 @@ export default function Component() {
                   !entries.length ? null : (
                     <div key={type}>
                       <p className="font-semibold text-white">{type}</p>
-                      <ul className="mt-4 space-y-6">
+                      <ul className="mt-4 space-y-3">
                         {entries.map((entry) => (
                           <EntryListItem key={entry.id} entry={entry} />
                         ))}
@@ -164,7 +164,7 @@ function EntryListItem({ entry }: { entry: Entry }) {
       {isAdmin ? (
         <Link
           to={`/entries/${entry.id}/edit`}
-          className="ml-2 text-sky-500 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
+          className="ml-3 text-sky-600 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
         >
           Edit
         </Link>
