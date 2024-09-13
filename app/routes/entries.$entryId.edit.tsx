@@ -70,7 +70,7 @@ export default function Component() {
       </div>
       <div className="mt-2 rounded-lg border border-gray-700/30 bg-gray-800/50 p-4 lg:p-6">
         <p className="text-sm font-medium text-gray-500 lg:text-base">
-          Create a new entry
+          Edit entry
         </p>
         <div className="mt-4 lg:mt-2">
           <EntryForm entry={entry} />
