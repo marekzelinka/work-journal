@@ -164,7 +164,7 @@ function EntryListItem({ entry }: { entry: Entry }) {
       {isAdmin ? (
         <Link
           to={`/entries/${entry.id}/edit`}
-          className="ml-3 text-sky-600 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
+          className="ml-4 text-sky-500 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
         >
           Edit
         </Link>
