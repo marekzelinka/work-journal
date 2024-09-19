@@ -40,7 +40,7 @@ export default function Component() {
   return (
     <div className="mx-auto max-w-xs lg:max-w-sm">
       <Form method="POST">
-        <div className="space-y-2">
+        <div className="space-y-6">
           <Input
             type="password"
             name="password"
@@ -49,8 +49,6 @@ export default function Component() {
             placeholder="Password"
             aria-label="Password"
           />
-        </div>
-        <div className="mt-8">
           <Button
             type="submit"
             className="w-full rounded-md bg-sky-600 px-3 py-2 font-medium text-white focus:outline-none data-[hover]:bg-sky-500 data-[focus]:ring-2 data-[focus]:ring-sky-600 data-[focus]:ring-offset-2 data-[focus]:ring-offset-gray-900"
