@@ -1,3 +1,4 @@
+import { Button } from "@headlessui/react";
 import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
@@ -93,17 +94,17 @@ export default function Component() {
               <div className="ml-4 flex items-center md:ml-6">
                 {isAdmin ? (
                   <Form method="POST">
-                    <button
+                    <Button
                       type="submit"
-                      className="rounded bg-white/10 px-3 py-1 text-sm font-semibold text-white shadow-sm hover:bg-white/20"
+                      className="rounded bg-white/10 px-2 py-1 text-sm font-semibold text-white shadow-sm data-[hover]:bg-white/20"
                     >
                       Sign out
-                    </button>
+                    </Button>
                   </Form>
                 ) : (
                   <Link
                     to="/login"
-                    className="rounded bg-white/10 px-3 py-1 text-sm font-semibold text-white shadow-sm hover:bg-white/20"
+                    className="rounded bg-white/10 px-2 py-1 text-sm font-semibold text-white shadow-sm hover:bg-white/20"
                   >
                     Login
                   </Link>

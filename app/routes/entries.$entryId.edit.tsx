@@ -1,4 +1,5 @@
 import { invariant, invariantResponse } from "@epic-web/invariant";
+import { Button } from "@headlessui/react";
 import { ArrowLeftIcon } from "@heroicons/react/16/solid";
 import {
   redirect,
@@ -95,12 +96,12 @@ export default function Component() {
           }}
         >
           <input type="hidden" name="intent" value="deleteEntry" />
-          <button
+          <Button
             type="submit"
-            className="text-sm text-red-400 hover:text-red-200"
+            className="text-sm/6 font-medium text-red-400 data-[hover]:text-red-200"
           >
             Delete this entry…
-          </button>
+          </Button>
         </Form>
       </div>
     </>

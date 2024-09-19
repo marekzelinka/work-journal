@@ -1,5 +1,6 @@
 import { invariant } from "@epic-web/invariant";
 import { Button, Input } from "@headlessui/react";
+import { KeyIcon } from "@heroicons/react/20/solid";
 import {
   json,
   redirect,
@@ -41,17 +42,22 @@ export default function Component() {
     <div className="mx-auto max-w-xs lg:max-w-sm">
       <Form method="POST">
         <div className="space-y-6">
-          <Input
-            type="password"
-            name="password"
-            id="password"
-            className="w-full rounded-md border-gray-700 bg-gray-800 text-white data-[focus]:border-sky-600 data-[focus]:ring-sky-600"
-            placeholder="Password"
-            aria-label="Password"
-          />
+          <div className="relative">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <KeyIcon className="size-5 text-gray-400" />
+            </div>
+            <Input
+              type="password"
+              name="password"
+              id="password"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-10 text-white shadow-sm ring-1 ring-inset ring-white/10 data-[focus]:ring-2 data-[focus]:ring-inset data-[focus]:ring-sky-500 sm:text-sm/6"
+              placeholder="Password"
+              aria-label="Password"
+            />
+          </div>
           <Button
             type="submit"
-            className="w-full rounded-md bg-sky-600 px-3 py-2 font-medium text-white focus:outline-none data-[hover]:bg-sky-500 data-[focus]:ring-2 data-[focus]:ring-sky-600 data-[focus]:ring-offset-2 data-[focus]:ring-offset-gray-900"
+            className="w-full rounded-md bg-sky-500 px-3 py-2 text-sm font-semibold text-white shadow-sm data-[hover]:bg-sky-400 data-[focus]:outline data-[focus]:outline-2 data-[focus]:outline-offset-2 data-[focus]:outline-sky-500"
           >
             Login
           </Button>
