@@ -1,3 +1,4 @@
+import { invariantResponse } from "@epic-web/invariant";
 import { CloudIcon } from "@heroicons/react/16/solid";
 import {
   type ActionFunctionArgs,
@@ -31,12 +32,23 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export async function action({ request }: ActionFunctionArgs) {
   await requiredSignedAdmin(request);
 
-  const fromData = await request.formData();
-  const { id, date, type, text, link } = validate(Object.fromEntries(fromData));
+  const formData = await request.formData();
+  const intent = formData.get("intent");
 
-  return await db.entry.create({
-    data: { id, date: new Date(date), type, text, link: link || null },
-  });
+  if (intent === "createEntry") {
+    const { id, date, type, text, link } = validateEntry(
+      Object.fromEntries(formData),
+    );
+
+    return await db.entry.create({
+      data: { id, date: new Date(date), type, text, link: link || null },
+    });
+  }
+
+  invariantResponse(
+    false,
+    `Invalid intent: ${formData.get("intent") ?? "Missing"}`,
+  );
 }
 
 export default function Component() {
@@ -129,21 +141,19 @@ export default function Component() {
 }
 
 function useOptimisticEntries() {
-  type OptimisticEntryFetcher = ReturnType<typeof useFetchers>[number] & {
+  type CreateEntryFetcher = ReturnType<typeof useFetchers>[number] & {
     formData: FormData;
   };
 
   return useFetchers()
     .filter(
-      (fetcher): fetcher is OptimisticEntryFetcher =>
-        fetcher.formData !== undefined,
+      (fetcher): fetcher is CreateEntryFetcher =>
+        fetcher.formData?.get("intent") === "createEntry",
     )
     .map((fetcher): Entry => {
-      const { id, date, type, text, link } = validate(
-        Object.fromEntries(fetcher.formData),
-      );
+      const entry = validateEntry(Object.fromEntries(fetcher.formData));
 
-      return { id, date, type, text, link };
+      return entry;
     });
 }
 
@@ -173,7 +183,7 @@ function EntryListItem({ entry }: { entry: Entry }) {
   );
 }
 
-function validate(data: Record<string, FormDataEntryValue>) {
+function validateEntry(data: Record<string, FormDataEntryValue>) {
   const { id, date, type, text, link } = data;
 
   if (

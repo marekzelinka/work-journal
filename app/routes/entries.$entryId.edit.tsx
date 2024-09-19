@@ -18,7 +18,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     select: { id: true, date: true, type: true, text: true, link: true },
     where: { id: params.entryId },
   });
-  invariantResponse(entry, "Not Found");
+  invariantResponse(entry, "No entry found");
 
   return { ...entry, date: entry.date.toISOString().substring(0, 10) };
 }
@@ -26,32 +26,35 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 export async function action({ request, params }: ActionFunctionArgs) {
   await requiredSignedAdmin(request);
 
-  const fromData = await request.formData();
-  const { _action, date, type, text } = Object.fromEntries(fromData);
+  const formData = await request.formData();
+  const intent = formData.get("intent");
 
-  if (_action === "delete") {
-    await db.entry.delete({
-      select: { id: true },
-      where: { id: params.entryId },
-    });
-  } else {
-    if (
-      typeof date !== "string" ||
-      typeof type !== "string" ||
-      typeof text !== "string"
-    ) {
-      throw new Error("Bad request");
-    }
+  if (intent === "editEntry") {
+    const entry = validateEntry(Object.fromEntries(formData));
 
     invariant(params.entryId, "entryId is missing");
     await db.entry.update({
       select: { id: true },
+      data: entry,
       where: { id: params.entryId },
-      data: { date: new Date(date), type, text },
     });
+
+    return redirect("/");
   }
 
-  return redirect("/");
+  if (intent === "deleteEntry") {
+    await db.entry.delete({
+      select: { id: true },
+      where: { id: params.entryId },
+    });
+
+    return redirect("/");
+  }
+
+  invariantResponse(
+    false,
+    `Invalid intent: ${formData.get("intent") ?? "Missing"}`,
+  );
 }
 
 export default function Component() {
@@ -64,19 +67,23 @@ export default function Component() {
           to=".."
           className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-200"
         >
-          <ArrowLeftIcon className="size-4 text-gray-400" />
-          Go back
+          <ArrowLeftIcon className="size-4 text-gray-500" />
+          Back
         </Link>
       </div>
-      <div className="mt-2 rounded-lg border border-gray-700/30 bg-gray-800/50 p-4 lg:p-6">
-        <p className="text-sm font-medium text-gray-500 lg:text-base">
-          Edit entry
-        </p>
-        <div className="mt-4 lg:mt-2">
-          <EntryForm entry={entry} />
+      <div className="mt-2">
+        <div className="rounded-lg border border-gray-700/30 bg-gray-800/50 p-4 lg:p-6">
+          <div>
+            <p className="text-sm font-medium text-gray-400 lg:text-base">
+              Edit entry
+            </p>
+          </div>
+          <div className="mt-4 lg:mt-2">
+            <EntryForm entry={entry} />
+          </div>
         </div>
       </div>
-      <div className="mt-8">
+      <div className="mt-6">
         <Form
           method="POST"
           onSubmit={(event) => {
@@ -87,10 +94,9 @@ export default function Component() {
             }
           }}
         >
+          <input type="hidden" name="intent" value="deleteEntry" />
           <button
             type="submit"
-            name="_action"
-            value="delete"
             className="text-sm text-red-400 hover:text-red-200"
           >
             Delete this entry…
@@ -99,4 +105,23 @@ export default function Component() {
       </div>
     </>
   );
+}
+
+function validateEntry(data: Record<string, FormDataEntryValue>) {
+  const { date, type, text, link } = data;
+
+  if (
+    typeof date !== "string" ||
+    typeof type !== "string" ||
+    typeof text !== "string"
+  ) {
+    throw new Error("Bad data");
+  }
+
+  return {
+    date: new Date(date),
+    type,
+    text,
+    link: typeof link === "string" ? link : "",
+  };
 }

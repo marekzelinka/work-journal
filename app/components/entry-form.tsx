@@ -19,7 +19,7 @@ export function EntryForm({
   const editMode = Boolean(entry);
 
   const navigation = useNavigation();
-  const savingEdits = navigation.state !== "idle";
+  const savingEdits = navigation.formData?.get("intent") === "editEntry";
 
   const submit = useSubmit();
 
@@ -37,10 +37,10 @@ export function EntryForm({
         event.preventDefault();
 
         const formData = new FormData(event.currentTarget);
-        const data = validate(Object.fromEntries(formData));
+        const entry = validateEntry(Object.fromEntries(formData));
 
         submit(
-          { ...data, id: window.crypto.randomUUID() },
+          { ...entry, id: window.crypto.randomUUID(), intent: "createEntry" },
           {
             method: "POST",
             navigate: false,
@@ -56,12 +56,17 @@ export function EntryForm({
         }
       }}
     >
+      {editMode ? (
+        <input type="hidden" name="intent" value="editEntry" />
+      ) : (
+        <input type="hidden" name="intent" value="createEntry" />
+      )}
       <Fieldset
         disabled={savingEdits}
-        className="space-y-6 data-[disabled]:pointer-events-none data-[disabled]:opacity-70"
+        className="space-y-4 data-[disabled]:pointer-events-none data-[disabled]:opacity-70"
         aria-label="New entry"
       >
-        <div className="max-lg:space-y-6 lg:flex lg:items-center lg:justify-between">
+        <div className="max-lg:space-y-4 lg:flex lg:items-center lg:justify-between">
           <div className="lg:order-last">
             <Input
               type="date"
@@ -106,6 +111,7 @@ export function EntryForm({
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 event.preventDefault();
+
                 const isValid = event.currentTarget.reportValidity();
 
                 if (!isValid) {
@@ -150,7 +156,7 @@ export function EntryForm({
   );
 }
 
-function validate(data: Record<string, FormDataEntryValue>) {
+function validateEntry(data: Record<string, FormDataEntryValue>) {
   const { date, type, text, link } = data;
 
   if (
